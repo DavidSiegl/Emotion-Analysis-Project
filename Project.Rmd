@@ -11,10 +11,10 @@ library(ggplot2)
 library(tidyverse)
 ```
 ```{r}
-consumerKey = "X"  
-consumerSecret = "X"
-accessToken = "X-X"
-accessSecret = "X"
+consumerKey = "E0kcW1Kx0GNc6doKP042WBVhA"  
+consumerSecret = "FlWj4g7Vtbi6UKiFDSdMeSwTNnva2mG8DWEdgCKLX8t0PDyRGl"
+accessToken = "1403330200285454340-JZnlzgjjc4TNNkGgeEgv6UnaVehKX3"
+accessSecret = "uFYlateFrodReYw8a1hjt7YyQDFMM6g5fJ273P2e6tR77"
 options(httr_oauth_cache=TRUE)
 setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
                     access_token = accessToken, access_secret = accessSecret)
@@ -24,9 +24,9 @@ scrape_tweets <- function(userID, n_tweets){
   tweets <- userTimeline(userID, n_tweets)
   tweets_df <- tbl_df(map_df(tweets, as.data.frame))
   tweets_df <- tweets_df %>%
-    select(c(text, favoriteCount, created, id, screenName, retweetCount))
-  write.csv(tweets_df, "tweets.csv")
+    select(c(id, text, screenName, created, favoriteCount, retweetCount))
+  write.csv(tweets_df, "tweets.csv", row.names = FALSE)
 }
 
-scrape_tweets("Alice_Weidel", 50)
+scrape_tweets("Alice_Weidel", 1000)
 ```
