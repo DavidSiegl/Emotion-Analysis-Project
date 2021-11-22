@@ -1,7 +1,9 @@
 ---
 title: "Emotional Attributes of diverging political spheres on Twitter"
 author: "Florian Klement, David Siegl, Shirin Yanni"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 
@@ -10,6 +12,7 @@ library(twitteR)
 library(ggplot2)
 library(tidyverse)
 ```
+<b>Accessing the Twitter-API</b>
 ```{r}
 consumerKey = "X"  
 consumerSecret = "X"
@@ -19,14 +22,23 @@ options(httr_oauth_cache=TRUE)
 setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
                     access_token = accessToken, access_secret = accessSecret)
 ```
+<b>Loading some data</b>
 ```{r}
-scrape_tweets <- function(userID, n_tweets){
+sheet <- read.csv("./Emotion Analysis - Twitter.csv")
+id_list <- as.list(sheet$Twitter.ID)
+```
+<b>Defining Function for Twitter-Scraping</b>
+```{r}
+scrape_tweets <- function(userID, n_tweets, filename){
   tweets <- userTimeline(userID, n_tweets)
   tweets_df <- tbl_df(map_df(tweets, as.data.frame))
   tweets_df <- tweets_df %>%
     select(c(id, text, screenName, created, favoriteCount, retweetCount))
-  write.csv(tweets_df, "tweets.csv", row.names = FALSE)
+  write.csv(tweets_df, paste(filename,"-tweets.csv", sep = ""), row.names = FALSE)
 }
 
-scrape_tweets("Alice_Weidel", 1000)
+for (id in id_list) {
+  scrape_tweets(id, 900, id)
+}
 ```
+
