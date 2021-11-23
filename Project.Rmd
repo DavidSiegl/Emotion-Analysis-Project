@@ -11,6 +11,7 @@ output:
 library(twitteR)
 library(ggplot2)
 library(tidyverse)
+library(stopwords)
 ```
 <b>Accessing the Twitter-API</b>
 ```{r}
@@ -37,8 +38,29 @@ scrape_tweets <- function(userID, n_tweets, filename){
   write.csv(tweets_df, paste(filename,"-tweets.csv", sep = ""), row.names = FALSE)
 }
 
-for (id in id_list) {
-  scrape_tweets(id, 900, id)
+# for (id in id_list) {
+#   scrape_tweets(id, 900, id)
+# }
+```
+<b>Loading the Tweets</b>
+```{r}
+tweets_files <- list.files("./data")
+
+for (i in 1:length(tweets_files)) {                              
+  assign(paste0("tweets_", i),                                   
+         read.csv(paste0("./data/",
+                   tweets_files[i])))
+}
+```
+
+<b>Preprocessing</b>
+```{r}
+cleaning_tweets <- function(text){
+  text <- gsub(",", "", text)               
+  text <- gsub("[[:punct:]]", "", text)
+  text <- gsub("[[:digit:]]", "", text)
+  words <- strsplit(text, " ")[[1]]           
+  words <- tolower(words) 
 }
 ```
 
