@@ -4,6 +4,7 @@ author: "Florian Klement, David Siegl, Shirin Yanni"
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 
@@ -15,13 +16,13 @@ library(stopwords)
 ```
 <b>Accessing the Twitter-API</b>
 ```{r}
-consumerKey = "X"  
-consumerSecret = "X"
-accessToken = "X-X"
-accessSecret = "X"
-options(httr_oauth_cache=TRUE)
-setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
-                    access_token = accessToken, access_secret = accessSecret)
+# consumerKey = "X"  
+# consumerSecret = "X"
+# accessToken = "X-X"
+# accessSecret = "X"
+# options(httr_oauth_cache=TRUE)
+# setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
+#                     access_token = accessToken, access_secret = accessSecret)
 ```
 <b>Loading some data</b>
 ```{r}
