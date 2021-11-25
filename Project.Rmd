@@ -12,56 +12,86 @@ output:
 library(twitteR)
 library(ggplot2)
 library(tidyverse)
-library(stopwords)
+library(quanteda)
 ```
+
 <b>Accessing the Twitter-API</b>
 ```{r}
-# consumerKey = "X"  
-# consumerSecret = "X"
-# accessToken = "X-X"
-# accessSecret = "X"
-# options(httr_oauth_cache=TRUE)
-# setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
-#                     access_token = accessToken, access_secret = accessSecret)
+consumerKey = "X"
+consumerSecret = "X"
+accessToken = "X-X"
+accessSecret = "X"
+options(httr_oauth_cache=TRUE)
+setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret,
+                    access_token = accessToken, access_secret = accessSecret)
 ```
+
 <b>Loading some data</b>
 ```{r}
 sheet <- read.csv("./Emotion Analysis - Twitter.csv")
 id_list <- as.list(sheet$Twitter.ID)
 ```
+
 <b>Defining Function for Twitter-Scraping</b>
 ```{r}
 scrape_tweets <- function(userID, n_tweets, filename){
-  tweets <- userTimeline(userID, n_tweets)
+  tweets <- userTimeline(userID, n_tweets, includeRts=FALSE, excludeReplies = FALSE)
   tweets_df <- tbl_df(map_df(tweets, as.data.frame))
   tweets_df <- tweets_df %>%
     select(c(id, text, screenName, created, favoriteCount, retweetCount))
   write.csv(tweets_df, paste(filename,"-tweets.csv", sep = ""), row.names = FALSE)
 }
 
-# for (id in id_list) {
-#   scrape_tweets(id, 900, id)
-# }
+for (id in id_list) {
+  scrape_tweets(id, 3200, id)
+}
 ```
+
 <b>Loading the Tweets</b>
 ```{r}
-tweets_files <- list.files("./data")
+tweets_files <- list.files("./data/raw")
 
 for (i in 1:length(tweets_files)) {                              
   assign(paste0("tweets_", i),                                   
-         read.csv(paste0("./data/",
+         read.csv(paste0("./data/raw/",
                    tweets_files[i])))
 }
 ```
 
+
 <b>Preprocessing</b>
+```{r}
+tweets_1 <- top_n(tweets_1, 80, created)
+tweets_2 <- top_n(tweets_2, 80, created)
+tweets_3 <- top_n(tweets_3, 80, created)
+tweets_4 <- top_n(tweets_4, 80, created)
+tweets_5 <- top_n(tweets_5, 80, created)
+tweets_6 <- top_n(tweets_6, 80, created)
+tweets_7 <- top_n(tweets_7, 80, created)
+tweets_8 <- top_n(tweets_8, 80, created)
+tweets_9 <- top_n(tweets_9, 80, created)
+tweets_10 <- top_n(tweets_10, 80, created)
+tweets_11 <- top_n(tweets_11, 80, created)
+tweets_12 <- top_n(tweets_12, 80, created)
+tweets_13 <- top_n(tweets_13, 80, created)
+tweets_14 <- top_n(tweets_14, 80, created)
+tweets_15 <- top_n(tweets_15, 80, created)
+tweets_16 <- top_n(tweets_16, 80, created)
+tweets_17 <- top_n(tweets_17, 80, created)
+tweets_18 <- top_n(tweets_18, 80, created)
+```
+
+
 ```{r}
 cleaning_tweets <- function(text){
   text <- gsub(",", "", text)               
   text <- gsub("[[:punct:]]", "", text)
   text <- gsub("[[:digit:]]", "", text)
-  words <- strsplit(text, " ")[[1]]           
-  words <- tolower(words) 
 }
+
+tweets_1 <- tweets_1 %>%
+  rowwise() %>%
+  mutate(text = cleaning_tweets(text))
 ```
+
 
