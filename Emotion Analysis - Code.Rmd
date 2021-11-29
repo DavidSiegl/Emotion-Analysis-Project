@@ -116,7 +116,8 @@ unique(df_full$screen_name)
 
 df_full <- df_full %>%
   rowwise() %>%
-  mutate(text = cleaning_tweets(text))
+  mutate(text = cleaning_tweets(text)) %>%
+  mutate(date = as.Date(created_at))
 
 write.csv(df_full, "./data/clean/tweets_clean.csv", row.names = FALSE)
 ```
