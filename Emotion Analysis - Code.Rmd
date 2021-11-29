@@ -12,10 +12,8 @@ output:
 library(rtweet)
 library(ggplot2)
 library(tidyverse)
-library(dplyr)
+library(gsubfn)
 library(quanteda)
-library(purrr)
-library(data.table)
 library(tm)
 quanteda::stopwords
 ```
@@ -72,7 +70,7 @@ for (i in 1:length(tweets_files)) {
 
 <b>Preprocessing</b>
 ```{r}
-tweets_1 <- top_n(tweets_1, 300, created_at)
+tweets_1 <- top_n(tweets_1, 300, created_at) #sampling the tweets for n=300
 tweets_2 <- top_n(tweets_2, 300, created_at)
 tweets_4 <- top_n(tweets_4, 300, created_at)
 tweets_5 <- top_n(tweets_5, 300, created_at)
@@ -94,69 +92,41 @@ tweets_16 <- top_n(tweets_16, 300, created_at)
 cleaning_tweets <- function(text){
   text <- gsub("http.+", "", text)
   text <- gsub(",", "", text)
-  text <- gsub("[[:punct:-[#]]", "", text)
+  text <- gsubfn(pattern = "[[:punct:]]", engine = "R",
+       replacement = function(x) ifelse(x == "#", "#", ""), 
+       text)
   text <- gsub("[[:digit:]]", "", text)
   text <- gsub("  ", " ", text)
+  text <- tolower(text)
 }
+```
 
-tweets_1 <- tweets_1 %>%
+
+```{r}
+list <- list(tweets_1, tweets_2, tweets_3, tweets_4, tweets_5, tweets_6, tweets_7, tweets_8, tweets_9, tweets_10, tweets_11, tweets_12, tweets_13, tweets_14, tweets_15, tweets_16)
+df_full <- rbind(tweets_1, tweets_2, tweets_3, tweets_4, tweets_5, tweets_6, tweets_7, tweets_8, tweets_9, tweets_10, tweets_11, tweets_12, tweets_13, tweets_14, tweets_15, tweets_16, by = (c("status_id", "text", "screen_name", "created_at", "favorite_count", "retweet_count")), all = TRUE)
+
+unique(df_full$screen_name)
+
+df_full <- df_full %>%
+  filter(screen_name != TRUE) %>%
+  filter(screen_name != "screen_name")
+ 
+unique(df_full$screen_name)
+
+df_full <- df_full %>%
   rowwise() %>%
   mutate(text = cleaning_tweets(text))
 
-write.csv(tweets_1, "./data/clean/@ABaerbock-tweets_clean.csv", row.names = F)
+write.csv(df_full, "./data/clean/tweets_clean.csv", row.names = FALSE)
 ```
 
 
-<b>Processing_II</b>
 ```{r}
-collection <-
-    list.files(path = "./data/raw/",
-               full.names = T) %>% 
-    map_df(~read_csv(., col_types = cols(.default = "c")))
-collection
-```
-
-Sample unausgewogen
-```{r}
-table(collection$screen_name)
-```
-```{r}
-collection <- collection %>%
-  select('status_id', 'text', 'screen_name', 'created_at', 'favorite_count', 'retweet_count')
-str(collection)
-collection <- drop_na(collection)
-```
-
-```{r}
-names <- as.list(unique(collection$screen_name))
-set.seed(1)
-
-df_total <- data.frame()
-
-for (i in names) {
- dat <-  collection %>%
-  filter(screen_name == i) %>%
-   sample_n(298, replace = FALSE) 
-   
-
- df_total <- rbind(df_total,dat, use.names=TRUE)
+nlp_tweets <- function(text){
+  words = strsplit(text, " ")[[1]]  
 }
-
-#coll_s = do.call(rbind, datalist)
 ```
 
-```{r}
-coll_s <- df_total %>%
-filter(screen_name != TRUE)
-unique(coll_s$screen_name)
-```
-```{r}
-coll_s <- coll_s %>%
-  #rowwise() %>%
-  mutate(text = cleaning_tweets(text))
 
-coll_s
-```
-```{r}
-head(tweets_1)
-```
+
