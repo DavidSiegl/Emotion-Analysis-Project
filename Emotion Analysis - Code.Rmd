@@ -121,6 +121,18 @@ df_full <- df_full %>%
 
 write.csv(df_full, "./data/clean/tweets_clean.csv", row.names = FALSE)
 ```
+```{r}
+tweets_clean <- read.csv("./data/clean/tweets_clean.csv")
+
+join_info <- sheet %>%
+  mutate(screen_name = gsub("@", "", Twitter.ID))
+
+tweets_clean_joined <- left_join(tweets_clean, join_info, by = "screen_name")
+tweets_clean_joined <- tweets_clean_joined %>%
+  select(-c(Link, Follower, Notes, Twitter.ID))
+
+write.csv(tweets_clean_joined, "./data/clean/tweets_clean_joined.csv", row.names = FALSE)
+```
 
 
 ```{r}
