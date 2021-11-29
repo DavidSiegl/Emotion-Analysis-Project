@@ -136,9 +136,78 @@ write.csv(tweets_clean_joined, "./data/clean/tweets_clean_joined.csv", row.names
 
 
 ```{r}
-nlp_tweets <- function(text){
-  words = strsplit(text, " ")[[1]]  
-}
+tweets_clean_joined <- read.csv("./data/clean/tweets_clean_joined.csv")
+
+tweets_clean_joined <- rename(tweets_clean_joined, name = Name, party = Party, country = Country, left_right = left.right)
+corp_tweet <- corpus(tweets_clean_joined, text_field = "text")
+print(corp_tweet)
+```
+```{r}
+summary(corp_tweet, 5)
+tok_tweet <- tokens(corp_tweet)
+```
+
+```{r}
+tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
+o <- c("dass", "„")
+tok_clean <- tokens_select(tok_clean, pattern = o, selection = "remove")
+View(tok_clean)
+```
+
+
+
+```{r}
+tweet_matrix <- dfm(tok_clean)
+tweet_matrix
+dict <- read_tsv("./de.tsv")
+head(dict)
+```
+
+```{r}
+dict$word <- tolower(dict$word)
+```
+
+```{r}
+#dict1 <- as.dictionary(dict)
+#tw_mat_fin <- dfm_lookup(tweet_matrix, dict1)
+tweet_matrix_df <- as.data.frame(tweet_matrix)
+```
+```{r}
+# preprocessing = function(text){
+#   # this function takes a text and returns the term-frequency vector of it
+#   # as a data frame
+#   
+#   exclude = c("can", "i", "you", "one")  # list of stop words
+#   
+#   # cleaning and preprocessing
+#   text = gsub(",", "", text)               
+#   text = gsub("[[:punct:]]", "", text)
+#   text = gsub("[[:digit:]]", "", text)
+#   words = strsplit(text, " ")[[1]]           
+#   words = tolower(words)  
+#   
+#    # term frequencies
+#   tf = table(words)           
+#   tf = as.data.frame(tf)
+#   colnames(tf) = c("Word", "Frequency")
+#   tf = subset(tf, is.element(Word, exclude) == FALSE)
+#   
+#   return(tf)
+# }
+# 
+# net_valence_score = function(text, emo){
+#   tf = preprocessing(text)
+#   combined = merge(tf, emo, by="Word")
+#   score = sum(combined$Frequency * combined$Valence) / sum(combined$Frequency)
+#   return(score)
+# }
+# 
+# 
+# for(i in 1:nrow(reviews)){
+#   text = texts[i]
+#   score = net_valence_score(text, emo)
+#   valence_scores = c(valence_scores, score)
+# }
 ```
 
 
