@@ -143,7 +143,7 @@ write.csv(tweets_clean_joined, "./data/clean/tweets_clean_joined.csv", row.names
 tweets_clean_joined <- read.csv("./data/clean/tweets_clean_joined.csv")
 
 stopwords_de <- stopwords("german")
-stopwords_add <- c("dass", "„")
+stopwords_add <- c("dass", "„", "–")
 stopwords_de <- append(stopwords_de, stopwords_add)
 
 dict <- read_tsv("./dict/de.tsv")
@@ -151,27 +151,53 @@ dict$word <- tolower(dict$word)
 
 tweets_words <- function(text){
   words <- strsplit(text, " ")[[1]]
-  tf = table(words)           
-  tf = as.data.frame(tf)
-  colnames(tf) = c("word", "frequency")
-  tf = subset(tf, is.element(word, stopwords_de) == FALSE)
+  tf <- table(words)           
+  tf <- as.data.frame(tf)
+  colnames(tf) <- c("word", "frequency")
+  tf <- subset(tf, is.element(word, stopwords_de) == FALSE)
   return(tf)
 }
 
-texts <- paste(tweets_clean_joined$text, tweets_clean_joined$text, sep = " ")
-y <- c()
-for(i in 1:nrow(tweets_clean_joined)){
-  text <- texts[i]
-  x <- tweets_words(text)
-  y <- c(y, x)
+# texts <- paste(tweets_clean_joined$text, tweets_clean_joined$text, sep = " ")
+# df <- data.frame(words = character(0), frequency = numeric(0))
+# for(i in 1:nrow(tweets_clean_joined)){
+#   text <- texts[i]
+#   words <- tweets_words(text)
+#   df <- rbind(df, words)
+# }
+# 
+# write.csv(df, "./data/clean/tweets_words.csv")
+```
+
+
+```{r}
+tweets_words <- read.csv("./data/clean/tweets_words.csv")
+
+join_dict <- function(words, dict){
+  tf <- words
+  combined <- merge(tf, dict, by="word")
+  score = sum(combined$frequency * combined$valence) / sum(combined$frequency)
+  return(score)
 }
 
-# join_dict <- function(text, dict){
-#   tf = tweets_words(text)
-#   combined = merge(tf, dict, by="word")
-#   score = sum(combined$frequency * combined$valence) / sum(combined$frequency)
-#   return(score)
-# }
+score <- join_dict(tweets_words, dict)
+```
+
+
+```{r}
+tweets_clean_joined_ABaerbock <- tweets_clean_joined %>%
+  filter(screen_name == "ABaerbock")
+
+texts <- paste(tweets_clean_joined$text, tweets_clean_joined$text, sep = " ")
+df <- data.frame(words = character(0), frequency = numeric(0))
+for(i in 1:nrow(tweets_clean_joined_ABaerbock)){
+  text <- texts[i]
+  words <- tweets_words(text)
+  df <- rbind(df, words)
+}
+
+score <- join_dict(df, dict)
+print(score)
 ```
 
 
