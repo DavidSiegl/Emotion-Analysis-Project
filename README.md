@@ -2,7 +2,7 @@
 
 ## Requirements:
 - Load the required libraries in R ```requirements.txt```
-- Download the emotional dictionary here: https://zenodo.org/record/3756607/files/MTL_grouped.zip?download=1
+- Download the emotion dictionary here: https://zenodo.org/record/3756607/files/MTL_grouped.zip?download=1
 
 ## TO-DO:
 - cleaning and preprocessing the tweets (in progress)
