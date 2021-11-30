@@ -121,6 +121,8 @@ df_full <- df_full %>%
 
 write.csv(df_full, "./data/clean/tweets_clean.csv", row.names = FALSE)
 ```
+
+
 ```{r}
 tweets_clean <- read.csv("./data/clean/tweets_clean.csv")
 
@@ -130,85 +132,58 @@ join_info <- sheet %>%
 tweets_clean_joined <- left_join(tweets_clean, join_info, by = "screen_name")
 tweets_clean_joined <- tweets_clean_joined %>%
   select(-c(Link, Follower, Notes, Twitter.ID))
+tweets_clean_joined <- rename(tweets_clean_joined, name = Name, party = Party, country = Country, left_right = left.right)
 
 write.csv(tweets_clean_joined, "./data/clean/tweets_clean_joined.csv", row.names = FALSE)
 ```
 
 
+<b>Joining the emotion dictionary</b>
 ```{r}
 tweets_clean_joined <- read.csv("./data/clean/tweets_clean_joined.csv")
 
-tweets_clean_joined <- rename(tweets_clean_joined, name = Name, party = Party, country = Country, left_right = left.right)
-corp_tweet <- corpus(tweets_clean_joined, text_field = "text")
-print(corp_tweet)
-```
-```{r}
-summary(corp_tweet, 5)
-tok_tweet <- tokens(corp_tweet)
-```
+stopwords_de <- stopwords("german")
+stopwords_add <- c("dass", "„")
+stopwords_de <- append(stopwords_de, stopwords_add)
 
-```{r}
-tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-o <- c("dass", "„")
-tok_clean <- tokens_select(tok_clean, pattern = o, selection = "remove")
-View(tok_clean)
-```
-
-
-
-```{r}
-tweet_matrix <- dfm(tok_clean)
-tweet_matrix
-dict <- read_tsv("./de.tsv")
-head(dict)
-```
-
-```{r}
+dict <- read_tsv("./dict/de.tsv")
 dict$word <- tolower(dict$word)
-```
 
-```{r}
-#dict1 <- as.dictionary(dict)
-#tw_mat_fin <- dfm_lookup(tweet_matrix, dict1)
-tweet_matrix_df <- as.data.frame(tweet_matrix)
-```
-```{r}
-# preprocessing = function(text){
-#   # this function takes a text and returns the term-frequency vector of it
-#   # as a data frame
-#   
-#   exclude = c("can", "i", "you", "one")  # list of stop words
-#   
-#   # cleaning and preprocessing
-#   text = gsub(",", "", text)               
-#   text = gsub("[[:punct:]]", "", text)
-#   text = gsub("[[:digit:]]", "", text)
-#   words = strsplit(text, " ")[[1]]           
-#   words = tolower(words)  
-#   
-#    # term frequencies
-#   tf = table(words)           
-#   tf = as.data.frame(tf)
-#   colnames(tf) = c("Word", "Frequency")
-#   tf = subset(tf, is.element(Word, exclude) == FALSE)
-#   
-#   return(tf)
-# }
-# 
-# net_valence_score = function(text, emo){
-#   tf = preprocessing(text)
-#   combined = merge(tf, emo, by="Word")
-#   score = sum(combined$Frequency * combined$Valence) / sum(combined$Frequency)
+tweets_words <- function(text){
+  words <- strsplit(text, " ")[[1]]
+  tf = table(words)           
+  tf = as.data.frame(tf)
+  colnames(tf) = c("word", "frequency")
+  tf = subset(tf, is.element(word, stopwords_de) == FALSE)
+  return(tf)
+}
+
+texts <- paste(tweets_clean_joined$text, tweets_clean_joined$text, sep = " ")
+y <- c()
+for(i in 1:nrow(tweets_clean_joined)){
+  text <- texts[i]
+  x <- tweets_words(text)
+  y <- c(y, x)
+}
+
+# join_dict <- function(text, dict){
+#   tf = tweets_words(text)
+#   combined = merge(tf, dict, by="word")
+#   score = sum(combined$frequency * combined$valence) / sum(combined$frequency)
 #   return(score)
 # }
-# 
-# 
-# for(i in 1:nrow(reviews)){
-#   text = texts[i]
-#   score = net_valence_score(text, emo)
-#   valence_scores = c(valence_scores, score)
-# }
 ```
 
 
-
+<b>Quanteda Analysis</b>
+```{r}
+corp_tweet <- corpus(tweets_clean_joined, text_field = "text")
+print(corp_tweet)
+summary(corp_tweet, 5)
+tok_tweet <- tokens(corp_tweet)
+tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
+tok_clean <- tokens_select(tok_clean, pattern = o, selection = "remove")
+View(tok_clean)
+tweet_matrix <- dfm(tok_clean)
+tweet_matrix
+```
