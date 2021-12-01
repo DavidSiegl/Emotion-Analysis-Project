@@ -185,41 +185,41 @@ join_dict_dominance <- function(words, dict){
 
 <b>Getting valence, arousal and dominance score for all users</b>
 ```{r}
-texts <- paste(tweets_clean_joined$text_clean, tweets_clean_joined$text_clean, sep = " ")
-valence_scores <- c()
-arousal_scores <- c()
-dominance_scores <- c()
-
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    scores <- join_dict_valence(text, dict)
-    valence_scores <- c(valence_scores, scores)
-}
+# texts <- paste(tweets_clean_joined$text_clean, tweets_clean_joined$text_clean, sep = " ")
+# valence_scores <- c()
+# arousal_scores <- c()
+# dominance_scores <- c()
+# 
+# for(i in 1:nrow(tweets_clean_joined)){
+#     text <- texts[i]
+#     scores <- join_dict_valence(text, dict)
+#     valence_scores <- c(valence_scores, scores)
+# }
 ```
 
 
 ```{r}
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    scores <- join_dict_arousal(text, dict)
-    arousal_scores <- c(arousal_scores, scores)
-}
+# for(i in 1:nrow(tweets_clean_joined)){
+#     text <- texts[i]
+#     scores <- join_dict_arousal(text, dict)
+#     arousal_scores <- c(arousal_scores, scores)
+# }
 ```
 
 
 ```{r}
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    scores <- join_dict_dominance(df, dict)
-    dominance_scores <- c(dominance_scores, scores)
-}
+# for(i in 1:nrow(tweets_clean_joined)){
+#     text <- texts[i]
+#     scores <- join_dict_dominance(df, dict)
+#     dominance_scores <- c(dominance_scores, scores)
+# }
 ```
 
 
 ```{r}
-tweets_clean_joined_emo <- cbind(tweets_clean_joined, valence_scores, arousal_scores, dominance_scores)
-tweets_clean_joined_emo <- rename(tweets_clean_joined_emo, valence = valence_scores, arousal = arousal_scores, dominance = dominance_scores)
-write.csv(tweets_clean_joined_emo, "./data/clean/tweets_clean_joined_emo.csv", row.names = FALSE)
+# tweets_clean_joined_emo <- cbind(tweets_clean_joined, valence_scores, arousal_scores, dominance_scores)
+# tweets_clean_joined_emo <- rename(tweets_clean_joined_emo, valence = valence_scores, arousal = arousal_scores, dominance = dominance_scores)
+# write.csv(tweets_clean_joined_emo, "./data/clean/tweets_clean_joined_emo.csv", row.names = FALSE)
 ```
 
 
