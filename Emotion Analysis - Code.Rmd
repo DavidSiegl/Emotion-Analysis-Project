@@ -115,7 +115,7 @@ unique(df_full$screen_name)
 
 df_full <- df_full %>%
   rowwise() %>%
-  mutate(text = cleaning_tweets(text)) %>%
+  mutate(text_clean = cleaning_tweets(text)) %>%
   mutate(date = as.Date(created_at))
 
 write.csv(df_full, "./data/clean/tweets_clean.csv", row.names = FALSE)
@@ -161,21 +161,21 @@ tweets_words <- function(text){
 }
 
 join_dict_valence <- function(words, dict){
-  tf <- words
+  tf <- tweets_words(text)
   combined <- merge(tf, dict, by="word")
   score_valence <- sum(combined$frequency * combined$valence) / sum(combined$frequency)
   return(score_valence)
 }
 
 join_dict_arousal <- function(words, dict){
-  tf <- words
+  tf <- tweets_words(text)
   combined <- merge(tf, dict, by="word")
   score_arousal <- sum(combined$frequency * combined$arousal) / sum(combined$frequency)
   return(score_arousal)
 }
 
 join_dict_dominance <- function(words, dict){
-  tf <- words
+  tf <- tweets_words(text)
   combined <- merge(tf, dict, by="word")
   score_dominance <- sum(combined$frequency * combined$dominance) / sum(combined$frequency)
   return(score_dominance)
@@ -184,6 +184,60 @@ join_dict_dominance <- function(words, dict){
 
 
 <b>Getting valence, arousal and dominance score for all users</b>
+```{r}
+texts <- paste(tweets_clean_joined$text_clean, tweets_clean_joined$text_clean, sep = " ")
+valence_scores <- c()
+arousal_scores <- c()
+dominance_scores <- c()
+
+for(i in 1:nrow(tweets_clean_joined)){
+    text <- texts[i]
+    scores <- join_dict_valence(text, dict)
+    valence_scores <- c(valence_scores, scores)
+}
+```
+
+
+```{r}
+for(i in 1:nrow(tweets_clean_joined)){
+    text <- texts[i]
+    scores <- join_dict_arousal(text, dict)
+    arousal_scores <- c(arousal_scores, scores)
+}
+```
+
+
+```{r}
+for(i in 1:nrow(tweets_clean_joined)){
+    text <- texts[i]
+    scores <- join_dict_dominance(df, dict)
+    dominance_scores <- c(dominance_scores, scores)
+}
+```
+
+
+```{r}
+tweets_clean_joined_emo <- cbind(tweets_clean_joined, valence_scores, arousal_scores, dominance_scores)
+tweets_clean_joined_emo <- rename(tweets_clean_joined_emo, valence = valence_scores, arousal = arousal_scores, dominance = dominance_scores)
+write.csv(tweets_clean_joined_emo, "./data/clean/tweets_clean_joined_emo.csv", row.names = FALSE)
+```
+
+
+<b>Some plots</b>
+```{r}
+tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
+
+ggplot(data = tweets_clean_joined_emo, aes(x = arousal, y = retweet_count)) +
+  geom_point()
+
+ggplot(data = tweets_clean_joined_emo, aes(x = valence, y = retweet_count)) +
+  geom_point()
+
+ggplot(data = tweets_clean_joined_emo, aes(x = dominance, y = retweet_count)) +
+  geom_point()
+```
+
+
 ```{r}
 id_list <- gsub("@", "", id_list)
 
@@ -194,50 +248,6 @@ for(i in id_list){
 }
 
 list_var <- ls(pattern = "tweets_user_*")
-```
-
-
-```{r}
-texts <- paste(tweets_clean_joined$text, tweets_clean_joined$text, sep = " ")
-df <- data.frame(words = character(0), frequency = numeric(0))
-valence_scores <- c()
-arousal_scores <- c()
-dominance_scores <- c()
-
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    words <- tweets_words(text)
-    df <- rbind(df, words)
-    scores <- join_dict_valence(df, dict)
-    valence_scores <- c(valence_scores, scores)
-}
-```
-
-
-```{r}
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    words <- tweets_words(text)
-    df <- rbind(df, words)
-    scores <- join_dict_arousal(df, dict)
-    arousal_scores <- c(arousal_scores, scores)
-}
-```
-
-
-```{r}
-for(i in 1:nrow(tweets_clean_joined)){
-    text <- texts[i]
-    words <- tweets_words(text)
-    df <- rbind(df, words)
-    scores <- join_dict_dominance(df, dict)
-    dominance_scores <- c(dominance_scores, scores)
-}
-```
-
-
-```{r}
-test <- cbind(tweets_user_ABaerbock, valence_scores)
 ```
 
 
