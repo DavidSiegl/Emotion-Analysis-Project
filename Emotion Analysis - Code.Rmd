@@ -14,8 +14,8 @@ library(ggplot2)
 library(tidyverse)
 library(gsubfn)
 library(quanteda)
-library(tm)
-quanteda::stopwords
+library(quanteda.textplots)
+library(wordcloud2)
 ```
 
 <b>Accessing the Twitter-API</b>
@@ -243,7 +243,7 @@ id_list <- gsub("@", "", id_list)
 
 for(i in id_list){
  assign(paste0("tweets_user_", i),
-        tweets_clean_joined %>%
+        tweets_clean_joined_emo %>%
   filter(screen_name == i))
 }
 
@@ -253,13 +253,78 @@ list_var <- ls(pattern = "tweets_user_*")
 
 <b>Quanteda Analysis</b>
 ```{r}
-corp_tweet <- corpus(tweets_clean_joined, text_field = "text")
-print(corp_tweet)
-summary(corp_tweet, 5)
-tok_tweet <- tokens(corp_tweet)
+corp_tweet <- corpus(tweets_clean_joined_emo, text_field = "text_clean")
+
+corpus_DIEGRUENEN <- corp_tweet %>% 
+  corpus_subset(party == "BUENDNIS 90/DIE GRUENEN")
+
+corpus_GRUENE <- corp_tweet %>% 
+  corpus_subset(party == "GRUENE")
+
+corpus_AfD <- corp_tweet %>% 
+  corpus_subset(party == "AfD")
+
+corpus_FPOE <- corp_tweet %>% 
+  corpus_subset(party == "FPOE")
+
+get_dfm <- function(corpus){
+tok_tweet <- tokens(corpus)
 tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-tok_clean <- tokens_select(tok_clean, pattern = o, selection = "remove")
-View(tok_clean)
+stopwords_2 <- c("dass", "„", "–")
+tok_clean <- tokens_select(tok_clean, pattern = stopwords_2, selection = "remove")
 tweet_matrix <- dfm(tok_clean)
-tweet_matrix
+return(tweet_matrix)
+}
+```
+
+
+```{r}
+set.seed(1234)
+DIEGRUENEN_dfm <- get_dfm(corpus_DIEGRUENEN)
+textplot_wordcloud(DIEGRUENEN_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkgreen")
+```
+```{r}
+set.seed(1234)
+corpus_GRUENE_dfm <- get_dfm(corpus_GRUENE)
+textplot_wordcloud(corpus_GRUENE_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkgreen")
+```
+
+
+```{r}
+set.seed(1234)
+AfD_dfm <- get_dfm(corpus_AfD)
+textplot_wordcloud(AfD_dfm, max_words = 300, min_size = 0.9, min_count = 5, color = "darkblue")
+```
+
+
+```{r}
+set.seed(1234)
+FPOE_dfm <- get_dfm(corpus_FPOE)
+textplot_wordcloud(FPOE_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkblue")
+```
+
+
+```{r}
+comp_tweets_1 <- tweets_clean_joined_emo %>%
+  filter(left_right == 1)
+
+comp_tweets_2 <- tweets_clean_joined_emo %>%
+  filter(left_right == 0)
+
+paste_right <- paste(comp_tweets_1$text_clean, collapse = " ")
+paste_left <- paste(comp_tweets_2$text_clean, collapse = " ")
+left_right <- c(0, 1)
+
+df_comp <- data.frame(text = character(0), left_right = numeric(0))
+df_comp <- rbind(df_comp, paste_left, paste_right)
+df_comp <- cbind(df_comp, left_right)
+colnames(df_comp) <- c("text", "left_right")
+rownames(df_comp) <- c("left", "right")
+
+corp_comp <- corpus(df_comp, text_field = "text")
+
+comp_dfm <- get_dfm(corp_comp)
+
+textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 0.5,
+                   comparison = TRUE, color = c("darkgreen", "darkblue"))
 ```
