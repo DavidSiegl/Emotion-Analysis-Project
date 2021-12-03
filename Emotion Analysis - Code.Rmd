@@ -16,6 +16,10 @@ library(gsubfn)
 library(quanteda)
 library(quanteda.textplots)
 library(wordcloud2)
+library(arules)
+library(lubridate)
+library(patchwork)
+library(ggrepel)
 ```
 
 <b>Accessing the Twitter-API</b>
@@ -325,6 +329,240 @@ corp_comp <- corpus(df_comp, text_field = "text")
 
 comp_dfm <- get_dfm(corp_comp)
 
-textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 0.5,
+textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 0,
                    comparison = TRUE, color = c("darkgreen", "darkblue"))
 ```
+```{r}
+tweets_emo_avg <-
+  tweets_clean_joined_emo %>%
+  group_by(party) %>%
+  summarize(mean_valence = mean(valence, na.rm = T),
+            mean_arousal = mean(arousal, na.rm = T),
+            mean_dominance = mean(dominance, na.rm = T),
+            median_valence = median(valence, na.rm = T),
+            median_arousal = median(arousal, na.rm = T),
+            median_dominance = median(dominance, na.rm = T),
+            sd_valence = sd(valence, na.rm = T),
+            sd_arousal = sd(arousal, na.rm = T),
+            sd_dominance = sd(dominance, na.rm = T))
+tweets_emo_avg
+```
+
+```{r}
+
+party_l = c("FPOE", "AfD", "GRUENE", "BUENDNIS 90/DIE GRUENEN")
+tweets_afd <- tweets_clean_joined_emo %>%
+  filter(party == "AfD")
+
+tweets_fpoe <- tweets_clean_joined_emo %>%
+  filter(party == "FPOE")
+
+tweets_groe <- tweets_clean_joined_emo %>%
+  filter(party == "GRUENE")
+
+tweets_grde <- tweets_clean_joined_emo %>%
+  filter(party == "BUENDNIS 90/DIE GRUENEN")
+```
+
+```{r}
+summary(tweets_afd)
+```
+```{r}
+summary(tweets_fpoe)
+```
+```{r}
+summary(tweets_grde)
+```
+```{r}
+summary(tweets_groe)
+```
+
+<b>Temporal Discretisation</b>
+```{r}
+xy <- today()
+date_numeric <- function(date) {
+  date <- as.Date(date)
+span <- interval(ymd(date), ymd(xy))
+num <- as.duration(span)
+return(num)}
+date_numeric('2020-08-20')
+```
+
+```{r}
+tweets_emo_disc <- 
+  tweets_clean_joined_emo %>%
+  mutate(age = date_numeric(date))
+```
+
+```{r}
+tweets_emo_bin <- tweets_emo_disc 
+tweets_emo_bin$date_disc <-
+discretize(tweets_emo_disc$age, method = "frequency", breaks = 20, include.lowest = TRUE)
+```
+
+```{r}
+length(unique(tweets_emo_bin$date_disc))
+```
+```{r}
+tweets_disc_afd <- tweets_emo_bin %>%
+  filter(party == "AfD")
+
+tweets_disc_fpoe <- tweets_emo_bin %>%
+  filter(party == "FPOE")
+
+tweets_disc_groe <- tweets_emo_bin %>%
+  filter(party == "GRUENE")
+
+tweets_disc_grde <- tweets_emo_bin %>%
+  filter(party == "BUENDNIS 90/DIE GRUENEN")
+```
+
+```{r}
+violinplot_afd_valence <- 
+  ggplot(tweets_disc_afd, aes(x = name, y = valence, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Valence") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_afd_dominance <- 
+  ggplot(tweets_disc_afd, aes(x = name, y = dominance, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Dominance") +
+  theme_classic() +
+  theme(legend.position = "none")
+  
+violinplot_afd_arousal <- 
+  ggplot(tweets_disc_afd, aes(x = name, y = arousal, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Arousal") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+afd_comparison <- violinplot_afd_valence + violinplot_afd_dominance + violinplot_afd_arousal
+```
+
+```{r}
+violinplot_fpoe_valence <- 
+  ggplot(tweets_disc_fpoe, aes(x = name, y = valence, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Valence") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_fpoe_dominance <- 
+  ggplot(tweets_disc_fpoe, aes(x = name, y = dominance, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Dominance") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_fpoe_arousal <- 
+  ggplot(tweets_disc_fpoe, aes(x = name, y = arousal, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Arousal") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+
+fpoe_comparison <- violinplot_fpoe_valence + violinplot_fpoe_dominance + violinplot_fpoe_arousal
+```
+
+```{r}
+violinplot_groe_valence <- 
+  ggplot(tweets_disc_groe, aes(x = name, y = valence, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Valence") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_groe_dominance <- 
+  ggplot(tweets_disc_groe, aes(x = name, y = dominance, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Dominance") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_groe_arousal <- 
+  ggplot(tweets_disc_groe, aes(x = name, y = arousal, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Arousal") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+
+groe_comparison <- violinplot_groe_valence + violinplot_groe_dominance + violinplot_groe_arousal
+```
+
+```{r}
+violinplot_grde_valence <- 
+  ggplot(tweets_disc_grde, aes(x = name, y = valence, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Valence") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_grde_dominance <- 
+  ggplot(tweets_disc_grde, aes(x = name, y = dominance, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Dominance") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+violinplot_grde_arousal <- 
+  ggplot(tweets_disc_grde, aes(x = name, y = arousal, fill = name, color = name )) +
+  geom_violin(color = NA, alpha = 1, trim=TRUE, size=20) +
+  
+  geom_boxplot(size =1, width=0.1) +
+   xlab("\n Politician ") +
+   ylab("\n Arousal") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+
+grde_comparison <- violinplot_grde_valence + violinplot_grde_dominance + violinplot_grde_arousal
+```
+
+```{r}
+grde_comparison
+groe_comparison
+afd_comparison
+fpoe_comparison
+```
+```{r}
+
+```
+
