@@ -741,32 +741,32 @@ tweets_left <- tweets_emo_bin %>%
 
 <b>Deutschland - Valence</b>
 ```{r}
-t.test(tweets_disc_afd$valence, tweets_disc_grde$valence, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_afd$valence, tweets_disc_grde$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 <b>Deutschland - Dominance</b>
 ```{r}
-t.test(tweets_disc_afd$dominance, tweets_disc_grde$dominance, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_afd$dominance, tweets_disc_grde$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 <b>Deutschland - Arousal</b>
 ```{r}
-t.test(tweets_disc_afd$arousal, tweets_disc_grde$arousal, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_afd$arousal, tweets_disc_grde$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
 
 <b>Österreich - Valence</b>
 ```{r}
-t.test(tweets_disc_fpoe$valence, tweets_disc_groe$valence, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_fpoe$valence, tweets_disc_groe$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 <b>Österreich - Dominance</b>
 ```{r}
-t.test(tweets_disc_fpoe$dominance, tweets_disc_groe$dominance, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_fpoe$dominance, tweets_disc_groe$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 <b>Österreich - Arousal</b>
 ```{r}
-t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
@@ -775,14 +775,21 @@ t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, al
 
 <b>Links/Rechts - Valence</b>
 ```{r}
-t.test(tweets_right$valence, tweets_left$valence, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_right$valence, tweets_left$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 <b>Links/Rechts - Dominance</b>
 ```{r}
-t.test(tweets_right$dominance, tweets_left$dominance, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_right$dominance, tweets_left$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 <b>Links/Rechts - Arousal</b>
 ```{r}
-t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative = "two.sided", conf.level = 0.95)
+t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
+
+
+<b>Resultatsbesprechung</b>
+
+
+
+
