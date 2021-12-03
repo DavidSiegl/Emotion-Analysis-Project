@@ -227,23 +227,29 @@ join_dict_dominance <- function(words, dict){
 ```
 
 
-<b>Some plots</b>
+<b>Some scatter plots</b>
 ```{r}
 tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
 
 ggplot(data = tweets_clean_joined_emo, aes(x = arousal, y = retweet_count)) +
-  geom_point()
+  geom_point() +
+  scale_y_continuous(trans='log10') +
+  scale_x_continuous(trans='log10')
 
 ggplot(data = tweets_clean_joined_emo, aes(x = valence, y = retweet_count)) +
-  geom_point()
+  geom_point() +
+  scale_y_continuous(trans='log10') +
+  scale_x_continuous(trans='log10')
 
 ggplot(data = tweets_clean_joined_emo, aes(x = dominance, y = retweet_count)) +
-  geom_point()
+  geom_point() +
+  scale_y_continuous(trans='log10') +
+  scale_x_continuous(trans='log10')
 ```
 
 
 ```{r}
-id_list <- gsub("@", "", id_list)
+id_list <- gsub("@", "", id_list) #creating a list with all user subsets, in case we need to loop over it - might delete later
 
 for(i in id_list){
  assign(paste0("tweets_user_", i),
@@ -307,7 +313,7 @@ FPOE_dfm <- get_dfm(corpus_FPOE)
 textplot_wordcloud(FPOE_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkblue")
 ```
 
-<b>Wordcloud - Vergleich (In der Verwendung um 90° zu drehen und die Labels zu entfernen</b>
+<b>Wordcloud comparison</b>
 ```{r}
 comp_tweets_1 <- tweets_clean_joined_emo %>%
   filter(left_right == 1)
@@ -330,10 +336,10 @@ corp_comp <- corpus(df_comp, text_field = "text")
 comp_dfm <- get_dfm(corp_comp)
 
 textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 1,
-                   comparison = TRUE, color = c("darkblue", "darkgreen"))
+                   comparison = TRUE, color = c("darkblue", "darkgreen")) #for usage in presentation rotate 90°
 ```
 
-<b>Statistics - Vergleich: leider keine Korrelation auffindbar</b>
+<b>Descriptive Statistics</b>
 ```{r}
 tweets_emo_avg <-
   tweets_clean_joined_emo %>%
@@ -347,7 +353,7 @@ tweets_emo_avg <-
             sd_valence = sd(valence, na.rm = T),
             sd_arousal = sd(arousal, na.rm = T),
             sd_dominance = sd(dominance, na.rm = T))
-tweets_emo_avg
+tweets_emo_avg #only confirming Nullhypothesis - no significant deviations between left and right or party
 ```
 
 ```{r}
@@ -366,19 +372,23 @@ tweets_grde <- tweets_clean_joined_emo %>%
   filter(party == "BUENDNIS 90/DIE GRUENEN")
 ```
 
+
 ```{r}
 summary(tweets_afd)
 ```
 ```{r}
 summary(tweets_fpoe)
 ```
+
+
 ```{r}
 summary(tweets_grde)
 ```
+
+
 ```{r}
 summary(tweets_groe)
 ```
-
 
 
 <b>Temporal Discretisation</b>
@@ -392,11 +402,12 @@ return(num)}
 date_numeric('2020-08-20')
 ```
 
+
 ```{r}
-tweets_emo_disc <- 
-  tweets_clean_joined_emo %>%
-  mutate(age = date_numeric(date))
+tweets_emo_disc <- tweets_clean_joined_emo %>%
+  mutate(age = date_numeric(date)) #binning time series data for line plots
 ```
+
 
 ```{r}
 tweets_emo_bin <- tweets_emo_disc 
@@ -404,25 +415,32 @@ tweets_emo_bin$date_disc <-
 discretize(tweets_emo_disc$age, method = "frequency", breaks = 20, include.lowest = TRUE)
 ```
 
+
 ```{r}
 length(unique(tweets_emo_bin$date_disc))
 ```
+
+
 ```{r}
 tweets_disc_afd <- tweets_emo_bin %>%
-  filter(party == "AfD")
+  filter(party == "AfD") %>%
+  drop_na()
 
 tweets_disc_fpoe <- tweets_emo_bin %>%
-  filter(party == "FPOE")
+  filter(party == "FPOE")%>%
+  drop_na()
 
 tweets_disc_groe <- tweets_emo_bin %>%
-  filter(party == "GRUENE")
+  filter(party == "GRUENE")%>%
+  drop_na()
 
 tweets_disc_grde <- tweets_emo_bin %>%
-  filter(party == "BUENDNIS 90/DIE GRUENEN")
+  filter(party == "BUENDNIS 90/DIE GRUENEN")%>%
+  drop_na()
 ```
 
 
- <b>Violin Plots brauchen noch überarbeitung mit ggtext_repel und oder gg_label_repel</b>
+ <b>Violin Plots for emotional distributions</b>
 ```{r}
 violinplot_afd_valence <- 
   ggplot(tweets_disc_afd, aes(x = name, y = valence, fill = name, color = name )) +
@@ -432,7 +450,7 @@ violinplot_afd_valence <-
    xlab("\n Politician ") +
    ylab("\n Valence") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_afd_dominance <- 
   ggplot(tweets_disc_afd, aes(x = name, y = dominance, fill = name, color = name )) +
@@ -442,7 +460,7 @@ violinplot_afd_dominance <-
    xlab("\n Politician ") +
    ylab("\n Dominance") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
   
 violinplot_afd_arousal <- 
   ggplot(tweets_disc_afd, aes(x = name, y = arousal, fill = name, color = name )) +
@@ -452,10 +470,11 @@ violinplot_afd_arousal <-
    xlab("\n Politician ") +
    ylab("\n Arousal") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 afd_comparison <- violinplot_afd_valence + violinplot_afd_dominance + violinplot_afd_arousal
 ```
+
 
 ```{r}
 violinplot_fpoe_valence <- 
@@ -466,7 +485,7 @@ violinplot_fpoe_valence <-
    xlab("\n Politician ") +
    ylab("\n Valence") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_fpoe_dominance <- 
   ggplot(tweets_disc_fpoe, aes(x = name, y = dominance, fill = name, color = name )) +
@@ -476,7 +495,7 @@ violinplot_fpoe_dominance <-
    xlab("\n Politician ") +
    ylab("\n Dominance") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_fpoe_arousal <- 
   ggplot(tweets_disc_fpoe, aes(x = name, y = arousal, fill = name, color = name )) +
@@ -486,11 +505,12 @@ violinplot_fpoe_arousal <-
    xlab("\n Politician ") +
    ylab("\n Arousal") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 fpoe_comparison <- violinplot_fpoe_valence + violinplot_fpoe_dominance + violinplot_fpoe_arousal
 ```
+
 
 ```{r}
 violinplot_groe_valence <- 
@@ -501,7 +521,7 @@ violinplot_groe_valence <-
    xlab("\n Politician ") +
    ylab("\n Valence") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_groe_dominance <- 
   ggplot(tweets_disc_groe, aes(x = name, y = dominance, fill = name, color = name )) +
@@ -511,7 +531,7 @@ violinplot_groe_dominance <-
    xlab("\n Politician ") +
    ylab("\n Dominance") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_groe_arousal <- 
   ggplot(tweets_disc_groe, aes(x = name, y = arousal, fill = name, color = name )) +
@@ -521,11 +541,12 @@ violinplot_groe_arousal <-
    xlab("\n Politician ") +
    ylab("\n Arousal") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 groe_comparison <- violinplot_groe_valence + violinplot_groe_dominance + violinplot_groe_arousal
 ```
+
 
 ```{r}
 violinplot_grde_valence <- 
@@ -536,7 +557,7 @@ violinplot_grde_valence <-
    xlab("\n Politician ") +
    ylab("\n Valence") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_grde_dominance <- 
   ggplot(tweets_disc_grde, aes(x = name, y = dominance, fill = name, color = name )) +
@@ -546,7 +567,7 @@ violinplot_grde_dominance <-
    xlab("\n Politician ") +
    ylab("\n Dominance") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 violinplot_grde_arousal <- 
   ggplot(tweets_disc_grde, aes(x = name, y = arousal, fill = name, color = name )) +
@@ -556,11 +577,12 @@ violinplot_grde_arousal <-
    xlab("\n Politician ") +
    ylab("\n Arousal") +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 grde_comparison <- violinplot_grde_valence + violinplot_grde_dominance + violinplot_grde_arousal
 ```
+
 
 ```{r}
 grde_comparison
@@ -569,7 +591,8 @@ afd_comparison
 fpoe_comparison
 ```
 
-<b>Lineplots über Zeit - erratische Amplituden, aber keine nennenswerten Durschnittsunterschiede</b>
+
+<b>Lineplots over time</b>
 ```{r}
 lineplot_valence_grde <-
   ggplot(tweets_disc_grde, aes(x=age, y=valence)) +
@@ -604,6 +627,7 @@ lineplot_arousal_grde <-
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
+
 
 ```{r}
 lineplot_valence_groe <-
@@ -640,6 +664,7 @@ lineplot_arousal_groe <-
   theme_minimal()
 ```
 
+
 ```{r}
 lineplot_valence_fpoe <-
   ggplot(tweets_disc_fpoe, aes(x=age, y=valence)) +
@@ -675,16 +700,17 @@ lineplot_arousal_fpoe <-
   theme_minimal()
 ```
 
+
 ```{r}
 lineplot_valence_afd <-
   ggplot(tweets_disc_afd, aes(x=age, y=valence)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1, alpha = 0.4) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Valence over time in AFD") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  #scale_x_continuous(breaks = seq(1, 20, 2)) +
   # Let's use the Brewer color palette 
-  scale_color_brewer(type = "div", palette = "Set3") +
+  scale_color_brewer(type = "div", palette = "Set1") +
   theme_minimal()
 
 lineplot_dominance_afd <-
@@ -712,6 +738,20 @@ lineplot_arousal_afd <-
 
 
 ```{r}
+test <- tweets_emo_bin %>%
+  filter(name == "Alice Weidel" | name == "Annalena Baerbock")
+
+ggplot(test, aes(x=age, y=arousal)) +
+  geom_line(aes(color = name), size = 1.2, alpha = 0.4) +
+  xlab("\n over time") +
+  ylab("Arousal \n") +
+  ggtitle("Arousal over time") +
+  scale_color_manual(values = c("darkblue", "darkgreen")) +
+  theme_minimal()
+```
+
+
+```{r}
 lineplot_valence_afd
 lineplot_valence_fpoe
 lineplot_valence_groe
@@ -724,13 +764,10 @@ lineplot_arousal_afd
 lineplot_arousal_fpoe
 lineplot_arousal_groe
 lineplot_arousal_grde
-
 ```
 
 
 <b>T-tests</b>
-
-
 ```{r}
 tweets_right <- tweets_emo_bin %>%
   filter(left_right == "1")
@@ -739,57 +776,59 @@ tweets_left <- tweets_emo_bin %>%
   filter(left_right == "0")
 ```
 
-<b>Deutschland - Valence</b>
+
+<b>Germany - Valence</b>
 ```{r}
 t.test(tweets_disc_afd$valence, tweets_disc_grde$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
-<b>Deutschland - Dominance</b>
+
+
+<b>Germany - Dominance</b>
 ```{r}
 t.test(tweets_disc_afd$dominance, tweets_disc_grde$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
-<b>Deutschland - Arousal</b>
+
+<b>Germany - Arousal</b>
 ```{r}
 t.test(tweets_disc_afd$arousal, tweets_disc_grde$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-
-<b>Österreich - Valence</b>
+<b>Austria - Valence</b>
 ```{r}
 t.test(tweets_disc_fpoe$valence, tweets_disc_groe$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
-<b>Österreich - Dominance</b>
+
+
+<b>Austria - Dominance</b>
 ```{r}
 t.test(tweets_disc_fpoe$dominance, tweets_disc_groe$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
-<b>Österreich - Arousal</b>
+
+<b>Austria - Arousal</b>
 ```{r}
 t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-
-
-
-<b>Links/Rechts - Valence</b>
+<b>Left/Right - Valence</b>
 ```{r}
 t.test(tweets_right$valence, tweets_left$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
-<b>Links/Rechts - Dominance</b>
+
+
+<b>Left/Right - Dominance</b>
 ```{r}
 t.test(tweets_right$dominance, tweets_left$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
-<b>Links/Rechts - Arousal</b>
+
+<b>Left/Right - Arousal</b>
 ```{r}
 t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Resultatsbesprechung</b>
-
-
-
-
+<b>Results</b>
