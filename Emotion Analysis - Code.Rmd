@@ -307,7 +307,7 @@ FPOE_dfm <- get_dfm(corpus_FPOE)
 textplot_wordcloud(FPOE_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkblue")
 ```
 
-
+<b>Wordcloud - Vergleich (In der Verwendung um 90° zu drehen und die Labels zu entfernen</b>
 ```{r}
 comp_tweets_1 <- tweets_clean_joined_emo %>%
   filter(left_right == 1)
@@ -320,18 +320,20 @@ paste_left <- paste(comp_tweets_2$text_clean, collapse = " ")
 left_right <- c(0, 1)
 
 df_comp <- data.frame(text = character(0), left_right = numeric(0))
-df_comp <- rbind(df_comp, paste_left, paste_right)
+df_comp <- rbind(df_comp, paste_right, paste_left)
 df_comp <- cbind(df_comp, left_right)
 colnames(df_comp) <- c("text", "left_right")
-rownames(df_comp) <- c("left", "right")
+rownames(df_comp) <- c( "right", "left")
 
 corp_comp <- corpus(df_comp, text_field = "text")
 
 comp_dfm <- get_dfm(corp_comp)
 
-textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 0,
-                   comparison = TRUE, color = c("darkgreen", "darkblue"))
+textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 1,
+                   comparison = TRUE, color = c("darkblue", "darkgreen"))
 ```
+
+<b>Statistics - Vergleich: leider keine Korrelation auffindbar</b>
 ```{r}
 tweets_emo_avg <-
   tweets_clean_joined_emo %>%
@@ -377,6 +379,8 @@ summary(tweets_grde)
 summary(tweets_groe)
 ```
 
+
+
 <b>Temporal Discretisation</b>
 ```{r}
 xy <- today()
@@ -417,6 +421,8 @@ tweets_disc_grde <- tweets_emo_bin %>%
   filter(party == "BUENDNIS 90/DIE GRUENEN")
 ```
 
+
+ <b>Violin Plots brauchen noch überarbeitung mit ggtext_repel und oder gg_label_repel</b>
 ```{r}
 violinplot_afd_valence <- 
   ggplot(tweets_disc_afd, aes(x = name, y = valence, fill = name, color = name )) +
@@ -562,7 +568,160 @@ groe_comparison
 afd_comparison
 fpoe_comparison
 ```
-```{r}
 
+<b>Lineplots über Zeit - erratische Amplituden, aber keine nennenswerten Durschnittsunterschiede</b>
+```{r}
+lineplot_valence_grde <-
+  ggplot(tweets_disc_grde, aes(x=age, y=valence)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Valence over time in DIE GRUENEN") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_dominance_grde <-
+  ggplot(tweets_disc_grde, aes(x=age, y=dominance)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Dominance over time in DIE GRUENEN") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_arousal_grde <-
+  ggplot(tweets_disc_grde, aes(x=age, y=arousal)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Arousal over time in DIE GRUENEN") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
 ```
 
+```{r}
+lineplot_valence_groe <-
+  ggplot(tweets_disc_groe, aes(x=age, y=valence)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Valence over time in GRUENE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_dominance_groe <-
+  ggplot(tweets_disc_groe, aes(x=age, y=dominance)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Dominance over time in GRUENE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_arousal_groe <-
+  ggplot(tweets_disc_groe, aes(x=age, y=arousal)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Arousal over time in GRUENE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+```
+
+```{r}
+lineplot_valence_fpoe <-
+  ggplot(tweets_disc_fpoe, aes(x=age, y=valence)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Valence over time in FPOE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_dominance_fpoe <-
+  ggplot(tweets_disc_fpoe, aes(x=age, y=dominance)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Dominance over time in FPOE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_arousal_fpoe <-
+  ggplot(tweets_disc_fpoe, aes(x=age, y=arousal)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Arousal over time in FPOE") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+```
+
+```{r}
+lineplot_valence_afd <-
+  ggplot(tweets_disc_afd, aes(x=age, y=valence)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Valence over time in AFD") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_dominance_afd <-
+  ggplot(tweets_disc_afd, aes(x=age, y=dominance)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Dominance over time in AFD") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+
+lineplot_arousal_afd <-
+  ggplot(tweets_disc_afd, aes(x=age, y=arousal)) +
+  geom_line(aes(color = name), size = 1.5) +
+  xlab("\n over time") +
+  ylab("Valence \n") +
+  ggtitle("Arousal over time in AFD") +
+  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
+  # Let's use the Brewer color palette 
+  scale_color_brewer(type = "div", palette = "Set3") +
+  theme_minimal()
+```
+
+
+```{r}
+lineplot_valence_afd
+lineplot_valence_fpoe
+lineplot_valence_groe
+lineplot_valence_grde
+lineplot_dominance_fpoe
+lineplot_dominance_afd
+lineplot_dominance_groe
+lineplot_dominance_grde
+lineplot_arousal_afd
+lineplot_arousal_fpoe
+lineplot_arousal_groe
+lineplot_arousal_grde
+```

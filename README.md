@@ -6,4 +6,7 @@
 
 ## TO-DO:
 - some visualisations: word frequencies, scatterplots to check for correlations (e. g. dominance-party, emotionality-size/outreach of profile), barplots, line plots for valence, arousal, dominance over time with different users as separate lines
+
+- No correlation to be found -> t-test failing to reject the 0 hypothesis. ggrepel on the violin plots for visualisations
+
 - statistical models: t-test, linear regression (predicting rt count), classification model? (predicting if right or left)
