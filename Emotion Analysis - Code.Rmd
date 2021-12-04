@@ -10,7 +10,6 @@ output:
 
 ```{r}
 library(rtweet)
-library(ggplot2)
 library(tidyverse)
 library(gsubfn)
 library(quanteda)
