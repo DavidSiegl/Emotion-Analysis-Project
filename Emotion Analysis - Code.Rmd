@@ -14,7 +14,6 @@ library(tidyverse)
 library(gsubfn)
 library(quanteda)
 library(quanteda.textplots)
-library(wordcloud2)
 library(arules)
 library(lubridate)
 library(patchwork)
@@ -282,20 +281,26 @@ fear_scores <- c()
 ```{r}
 tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
 
-ggplot(data = tweets_clean_joined_emo, aes(x = arousal, y = retweet_count)) +
-  geom_point() +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10')
+tweets_scatter <- tweets_clean_joined_emo %>%
+  drop_na() %>%
+  filter(retweet_count > 20)
 
-ggplot(data = tweets_clean_joined_emo, aes(x = valence, y = retweet_count)) +
-  geom_point() +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10')
+ggplot(data = tweets_scatter, aes(x = arousal, y = retweet_count, color = retweet_count)) +
+  geom_point(alpha = 0.4) +
+  scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10')
 
-ggplot(data = tweets_clean_joined_emo, aes(x = dominance, y = retweet_count)) +
-  geom_point() +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10')
+ggplot(data = tweets_scatter, aes(x = valence, y = retweet_count, color = retweet_count)) +
+  geom_point(alpha = 0.4) +
+  scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10')
+
+ggplot(data = tweets_scatter, aes(x = dominance, y = retweet_count, color = retweet_count)) +
+  geom_point(alpha = 0.4) +
+  scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10')
+
+# Generally speaking, there seems to be a quadratic relationship between rt count and emotionality - i. e. the rt count reaches a certain maximum at roughly the median of the dataset and then declines again. Here a polynomial regression model might be adequate to predict rt count based on emotionality (valence, arousal, dominance, anger and fear).
 ```
 
 
