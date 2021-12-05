@@ -7,4 +7,4 @@
 ## TO-DO:
 - some visualisations: barplots
 
-- statistical models: <s>linear regression (predicting rt count), classification model? (predicting if right or left)</s>, so far 0-hypothesis stands true - maybe include anger and fear into emo-model?
+- statistical models: linear regression (predicting rt count)
