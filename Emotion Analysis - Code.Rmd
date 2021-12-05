@@ -7,7 +7,7 @@ output:
   pdf_document: default
 ---
 
-
+# Libraries
 ```{r}
 library(rtweet)
 library(tidyverse)
@@ -21,7 +21,8 @@ library(patchwork)
 library(ggrepel)
 ```
 
-<b>Accessing the Twitter-API</b>
+
+# Accessing the Twitter-API
 ```{r}
 consumerKey = "X"
 consumerSecret = "X"
@@ -36,14 +37,14 @@ twitter_token <- create_token(
 ```
 
 
-<b>Loading some data</b>
+## Loading some data
 ```{r}
 sheet <- read.csv("./Emotion Analysis - Twitter.csv")
 id_list <- as.list(sheet$Twitter.ID)
 ```
 
 
-<b>Defining Function for Twitter-Scraping</b>
+## Defining Function for Twitter-Scraping
 ```{r}
 scrape_tweets <- function(userID, n_tweets, filename){
   tweets <- get_timeline(userID, n_tweets, include_rts=FALSE, exclude_replies=TRUE)
@@ -59,7 +60,7 @@ scrape_tweets <- function(userID, n_tweets, filename){
 ```
 
 
-<b>Loading the Tweets</b>
+## Loading the Tweets
 ```{r}
 tweets_files <- list.files("./data/raw")
 
@@ -71,7 +72,7 @@ for (i in 1:length(tweets_files)) {
 ```
 
 
-<b>Preprocessing</b>
+# Preprocessing
 ```{r}
 tweets_1 <- top_n(tweets_1, 300, created_at) #sampling the tweets for n=300
 tweets_2 <- top_n(tweets_2, 300, created_at)
@@ -140,7 +141,7 @@ write.csv(tweets_clean_joined, "./data/clean/tweets_clean_joined.csv", row.names
 ```
 
 
-<b>Joining the emotion dictionary</b>
+# Joining the emotion dictionary
 ```{r}
 tweets_clean_joined <- read.csv("./data/clean/tweets_clean_joined.csv")
 
@@ -162,7 +163,10 @@ tweets_words <- function(text){
   tf <- subset(tf, is.element(word, stopwords_de) == FALSE)
   return(tf)
 }
+```
 
+
+```{r}
 join_dict_valence <- function(words, dict){
   tf <- tweets_words(text)
   combined <- merge(tf, dict, by="word")
@@ -186,7 +190,7 @@ join_dict_dominance <- function(words, dict){
 ```
 
 
-<b>Getting valence, arousal and dominance score for all users</b>
+## Getting valence, arousal and dominance score for all users
 ```{r}
 # texts <- paste(tweets_clean_joined$text_clean, tweets_clean_joined$text_clean, sep = " ")
 # valence_scores <- c()
@@ -226,7 +230,55 @@ join_dict_dominance <- function(words, dict){
 ```
 
 
-<b>Some scatter plots</b>
+## Also getting scores for anger and fear
+```{r}
+join_dict_anger <- function(words, dict){
+  tf <- tweets_words(text)
+  combined <- merge(tf, dict, by="word")
+  score_anger <- sum(combined$frequency * combined$anger) / sum(combined$frequency)
+  return(score_anger)
+}
+
+join_dict_fear <- function(words, dict){
+  tf <- tweets_words(text)
+  combined <- merge(tf, dict, by="word")
+  score_fear <- sum(combined$frequency * combined$fear) / sum(combined$frequency)
+  return(score_fear)
+}
+
+texts <- paste(tweets_clean_joined$text_clean, tweets_clean_joined$text_clean, sep = " ")
+anger_scores <- c()
+fear_scores <- c()
+```
+
+
+```{r}
+# for(i in 1:nrow(tweets_clean_joined)){
+#     text <- texts[i]
+#     scores <- join_dict_anger(df, dict)
+#     anger_scores <- c(anger_scores, scores)
+# }
+```
+
+
+```{r}
+# for(i in 1:nrow(tweets_clean_joined)){
+#     text <- texts[i]
+#     scores <- join_dict_fear(df, dict)
+#     fear_scores <- c(fear_scores, scores)
+# }
+```
+
+
+```{r}
+# tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
+# tweets_clean_joined_emo <- cbind(tweets_clean_joined_emo, anger_scores, fear_scores)
+# tweets_clean_joined_emo <- rename(tweets_clean_joined_emo, anger = anger_scores, fear = fear_scores)
+# write.csv(tweets_clean_joined_emo, "./data/clean/tweets_clean_joined_emo.csv", row.names = FALSE)
+```
+
+
+# Some scatter plots
 ```{r}
 tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
 
@@ -260,7 +312,7 @@ list_var <- ls(pattern = "tweets_user_*")
 ```
 
 
-<b>Quanteda Analysis</b>
+# Quanteda Analysis
 ```{r}
 corp_tweet <- corpus(tweets_clean_joined_emo, text_field = "text_clean")
 
@@ -286,7 +338,7 @@ return(tweet_matrix)
 }
 ```
 
-
+## Wordclouds for each party
 ```{r}
 set.seed(1234)
 DIEGRUENEN_dfm <- get_dfm(corpus_DIEGRUENEN)
@@ -312,7 +364,7 @@ FPOE_dfm <- get_dfm(corpus_FPOE)
 textplot_wordcloud(FPOE_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkblue")
 ```
 
-<b>Wordcloud comparison</b>
+## Wordcloud comparison
 ```{r}
 comp_tweets_1 <- tweets_clean_joined_emo %>%
   filter(left_right == 1)
@@ -338,7 +390,7 @@ textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_word
                    comparison = TRUE, color = c("darkblue", "darkgreen")) #for usage in presentation rotate 90°
 ```
 
-<b>Descriptive Statistics</b>
+# Descriptive Statistics
 ```{r}
 tweets_emo_avg <-
   tweets_clean_joined_emo %>%
@@ -352,8 +404,44 @@ tweets_emo_avg <-
             sd_valence = sd(valence, na.rm = T),
             sd_arousal = sd(arousal, na.rm = T),
             sd_dominance = sd(dominance, na.rm = T))
-tweets_emo_avg #only confirming Nullhypothesis - no significant deviations between left and right or party
+tweets_emo_avg
+
+tweets_emo_avg_1 <-
+  tweets_clean_joined_emo %>%
+  group_by(left_right) %>%
+  summarize(mean_valence = mean(valence, na.rm = T),
+            mean_arousal = mean(arousal, na.rm = T),
+            mean_dominance = mean(dominance, na.rm = T),
+            median_valence = median(valence, na.rm = T),
+            median_arousal = median(arousal, na.rm = T),
+            median_dominance = median(dominance, na.rm = T),
+            sd_valence = sd(valence, na.rm = T),
+            sd_arousal = sd(arousal, na.rm = T),
+            sd_dominance = sd(dominance, na.rm = T))
+tweets_emo_avg_1 #only confirming null hypothesis - no significant deviations between left and right or party
 ```
+
+
+```{r}
+tweets_emo_avg_2 <-
+  tweets_clean_joined_emo %>%
+  group_by(party) %>%
+  summarize(mean_anger = mean(anger, na.rm = T),
+            mean_fear = mean(fear, na.rm = T),
+            sd_anger = sd(anger, na.rm = T),
+            sd_fear = sd(fear, na.rm = T))
+tweets_emo_avg_2
+
+tweets_emo_avg_3 <-
+  tweets_clean_joined_emo %>%
+  group_by(left_right) %>%
+  summarize(mean_anger = mean(anger, na.rm = T),
+            mean_fear = mean(fear, na.rm = T),
+            sd_anger = sd(anger, na.rm = T),
+            sd_fear = sd(fear, na.rm = T))
+tweets_emo_avg_3 #Also including the dimensions of fear and anger paint the same picture...
+```
+
 
 ```{r}
 
@@ -375,6 +463,8 @@ tweets_grde <- tweets_clean_joined_emo %>%
 ```{r}
 summary(tweets_afd)
 ```
+
+
 ```{r}
 summary(tweets_fpoe)
 ```
@@ -390,7 +480,7 @@ summary(tweets_groe)
 ```
 
 
-<b>Temporal Discretisation</b>
+# Temporal Discretisation
 ```{r}
 xy <- today()
 date_numeric <- function(date) {
@@ -439,7 +529,7 @@ tweets_disc_grde <- tweets_emo_bin %>%
 ```
 
 
- <b>Violin Plots for emotional distributions</b>
+# Violin Plots for emotional distributions
 ```{r}
 violinplot_afd_valence <- 
   ggplot(tweets_disc_afd, aes(x = name, y = valence, fill = name, color = name )) +
@@ -591,7 +681,7 @@ fpoe_comparison
 ```
 
 
-<b>Lineplots over time</b>
+# Lineplots over time
 ```{r}
 lineplot_valence_grde <-
   ggplot(tweets_disc_grde, aes(x=age, y=valence)) +
@@ -766,7 +856,7 @@ lineplot_arousal_grde
 ```
 
 
-<b>T-tests</b>
+# T-tests
 ```{r}
 tweets_right <- tweets_emo_bin %>%
   filter(left_right == "1")
@@ -776,58 +866,58 @@ tweets_left <- tweets_emo_bin %>%
 ```
 
 
-<b>Germany - Valence</b>
+## Germany - Valence
 ```{r}
 t.test(tweets_disc_afd$valence, tweets_disc_grde$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Germany - Dominance</b>
+## Germany - Dominance
 ```{r}
 t.test(tweets_disc_afd$dominance, tweets_disc_grde$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Germany - Arousal</b>
+## Germany - Arousal
 ```{r}
 t.test(tweets_disc_afd$arousal, tweets_disc_grde$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Austria - Valence</b>
+## Austria - Valence
 ```{r}
 t.test(tweets_disc_fpoe$valence, tweets_disc_groe$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Austria - Dominance</b>
+## Austria - Dominance
 ```{r}
 t.test(tweets_disc_fpoe$dominance, tweets_disc_groe$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Austria - Arousal</b>
+## Austria - Arousal
 ```{r}
 t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Left/Right - Valence</b>
+## Left/Right - Valence
 ```{r}
 t.test(tweets_right$valence, tweets_left$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Left/Right - Dominance</b>
+## Left/Right - Dominance
 ```{r}
 t.test(tweets_right$dominance, tweets_left$dominance, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Left/Right - Arousal</b>
+## Left/Right - Arousal
 ```{r}
 t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
-<b>Results</b>
+# Results
