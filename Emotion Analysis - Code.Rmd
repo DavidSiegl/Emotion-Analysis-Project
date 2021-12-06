@@ -283,22 +283,31 @@ tweets_clean_joined_emo <- read.csv("./data/clean/tweets_clean_joined_emo.csv")
 
 tweets_scatter <- tweets_clean_joined_emo %>%
   drop_na() %>%
-  filter(retweet_count > 10)
+  filter(retweet_count < 1000) 
 
 ggplot(data = tweets_scatter, aes(x = arousal, y = retweet_count, color = retweet_count)) +
   geom_point(alpha = 0.4) +
-  scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10')
-
+  geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
+  xlab("Arousal") +
+  ylab("Retweet Count") +
+  ggtitle("Preliminary regression model") +
+  theme(legend.position = "none")
+  
 ggplot(data = tweets_scatter, aes(x = valence, y = retweet_count, color = retweet_count)) +
   geom_point(alpha = 0.4) +
-  scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10')
+  geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
+  xlab("Valence") +
+  ylab("Retweet Count") +
+  ggtitle("Preliminary regression model") +
+  theme(legend.position = "none")
 
 ggplot(data = tweets_scatter, aes(x = dominance, y = retweet_count, color = retweet_count)) +
   geom_point(alpha = 0.4) +
-  scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10')
+  geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
+  xlab("Dominance") +
+  ylab("Retweet Count") +
+  ggtitle("Preliminary regression model") +
+  theme(legend.position = "none")
 
 # Generally speaking, there seems to be a quadratic relationship between rt count and emotionality - i. e. the rt count reaches a certain maximum at roughly the median of the dataset and then declines again. Here a polynomial regression model might be adequate to predict rt count based on emotionality (p = valence, arousal, dominance, anger and fear).
 ```
@@ -315,6 +324,7 @@ ggplot(data = tweets_hist, aes(x = arousal, fill = party)) +
   geom_vline(aes(xintercept=mean(arousal)),
             color="red",  size=0.8) +
   theme_minimal() +
+  theme(legend.position = "none") +
   scale_fill_manual(values = c("darkgreen", "darkblue", "darkgreen", "darkblue")) +
   ggtitle("Arousal per Party") +
   xlab("Arousal") +
@@ -326,6 +336,7 @@ ggplot(data = tweets_hist, aes(x = valence, fill = party)) +
   geom_vline(aes(xintercept=mean(valence)),
             color="red",  size=0.8) +
   theme_minimal() +
+  theme(legend.position = "none") +
   scale_fill_manual(values = c("darkgreen", "darkblue", "darkgreen", "darkblue")) +
   ggtitle("Valence per Party") +
   xlab("Valence") +
@@ -337,6 +348,7 @@ ggplot(data = tweets_hist, aes(x = dominance, fill = party)) +
   geom_vline(aes(xintercept=mean(dominance)),
             color="red",  size=0.8) +
   theme_minimal() +
+  theme(legend.position = "none") +
   scale_fill_manual(values = c("darkgreen", "darkblue", "darkgreen", "darkblue")) +
   ggtitle("Dominance per Party") +
   xlab("Dominance") +
@@ -376,7 +388,7 @@ corpus_FPOE <- corp_tweet %>%
 get_dfm <- function(corpus){
 tok_tweet <- tokens(corpus)
 tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-stopwords_2 <- c("dass", "„", "–")
+stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua")
 tok_clean <- tokens_select(tok_clean, pattern = stopwords_2, selection = "remove")
 tweet_matrix <- dfm(tok_clean)
 return(tweet_matrix)
@@ -431,7 +443,7 @@ corp_comp <- corpus(df_comp, text_field = "text")
 
 comp_dfm <- get_dfm(corp_comp)
 
-textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 300, min_size = 0.7, min_count = 5, labelcolor = "black", rotation = 1,
+textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 140, min_size = 1.2, min_count = 5, labelcolor = "black", rotation = 1,
                    comparison = TRUE, color = c("darkblue", "darkgreen")) #for usage in presentation rotate 90°
 ```
 
@@ -489,7 +501,6 @@ tweets_emo_avg_3 #Also including the dimensions of fear and anger paint the same
 
 
 ```{r}
-
 party_l = c("FPOE", "AfD", "GRUENE", "BUENDNIS 90/DIE GRUENEN")
 tweets_afd <- tweets_clean_joined_emo %>%
   filter(party == "AfD")
@@ -872,16 +883,31 @@ lineplot_arousal_afd <-
 
 
 ```{r}
-test <- tweets_emo_bin %>%
-  filter(name == "Alice Weidel" | name == "Annalena Baerbock")
+emo_lineplot_aut <- tweets_emo_bin %>%
+  drop_na() %>%
+  filter(country == "Austria")
 
-ggplot(test, aes(x=age, y=arousal)) +
-  geom_line(aes(color = name), size = 1.2, alpha = 0.4) +
+ggplot(emo_lineplot_aut, aes(x=age, y=arousal)) +
+  geom_line(aes(color = party), size = 1.2, alpha = 0.4) +
   xlab("\n over time") +
   ylab("Arousal \n") +
   ggtitle("Arousal over time") +
   scale_color_manual(values = c("darkblue", "darkgreen")) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x=element_blank())
+
+emo_lineplot_de <- tweets_emo_bin %>%
+  drop_na() %>%
+  filter(country == "Germany")
+
+ggplot(emo_lineplot_de, aes(x=age, y=arousal)) +
+  geom_line(aes(color = party), size = 1.2, alpha = 0.4) +
+  xlab("\n over time") +
+  ylab("Arousal \n") +
+  ggtitle("Arousal over time") +
+  scale_color_manual(values = c("darkblue", "darkgreen")) +
+  theme_minimal() +
+  theme(axis.text.x=element_blank())
 ```
 
 
