@@ -18,7 +18,6 @@ library(arules)
 library(lubridate)
 library(patchwork)
 library(ggrepel)
-library(hrbrthemes)
 ```
 
 
