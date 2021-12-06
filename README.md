@@ -5,6 +5,4 @@
 - Download the emotion dictionary here: https://zenodo.org/record/3756607/files/MTL_grouped.zip?download=1
 
 ## TO-DO:
-- some visualisations: barplots
-
 - statistical models: linear regression (predicting rt count)
