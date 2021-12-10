@@ -6,3 +6,5 @@
 
 ## TO-DO:
 - statistical models: polynomial regression (predicting rt count)
+
+![poster](./Poster - Group 1.png)
