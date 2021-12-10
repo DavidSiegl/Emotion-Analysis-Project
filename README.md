@@ -1,5 +1,4 @@
 # Emotion-Analysis-Project
-[Poster](https://docs.google.com/presentation/d/1hwJc_1HjdIdKKRLUg3DMja4kfO5Tx9ceIwGwZDA1Rns/edit#slide=id.p1)
 
 ## Requirements:
 - Load the required libraries in R ```requirements.txt```
