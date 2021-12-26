@@ -18,6 +18,8 @@ library(arules)
 library(lubridate)
 library(patchwork)
 library(ggrepel)
+library(caret)
+library(mgcv)
 ```
 
 
@@ -305,6 +307,22 @@ ggplot(data = tweets_scatter, aes(x = dominance, y = retweet_count, color = retw
   geom_point(alpha = 0.4) +
   geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
   xlab("Dominance") +
+  ylab("Retweet Count") +
+  ggtitle("Preliminary regression model") +
+  theme(legend.position = "none")
+
+ggplot(data = tweets_scatter, aes(x = anger, y = retweet_count, color = retweet_count)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
+  xlab("Anger") +
+  ylab("Retweet Count") +
+  ggtitle("Preliminary regression model") +
+  theme(legend.position = "none")
+
+ggplot(data = tweets_scatter, aes(x = fear, y = retweet_count, color = retweet_count)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method="lm", formula=y~I(x)+I(x^2), color = "red") +
+  xlab("Fear") +
   ylab("Retweet Count") +
   ggtitle("Preliminary regression model") +
   theme(legend.position = "none")
@@ -991,4 +1009,33 @@ t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative
 ```
 
 
-# Results
+# Regression model
+```{r}
+set.seed(19)
+
+sample <- sample.int(n = nrow(tweets_scatter), size = floor(.70*nrow(tweets_scatter)), replace = FALSE)
+train <- tweets_scatter[sample, ]
+test  <- tweets_scatter[-sample, ]
+
+model <- lm(retweet_count ~ poly(valence, 2, raw = TRUE)  + poly(arousal, 2, raw = TRUE) + poly(dominance, 2, raw = TRUE) + poly(fear, 2, raw = TRUE) + poly(anger, 2, raw = TRUE), data = train)
+
+
+predictions <- model %>% predict(test)
+modelPerfomance = data.frame(
+   RMSE = RMSE(predictions, test$retweet_count),
+    R2 = R2(predictions, test$retweet_count)
+)
+print(model)
+print(modelPerfomance)
+
+# using splines for improving fitting accuracy
+
+model_gam <- gam(retweet_count ~ s(valence) + s(arousal) + s(dominance) + s(fear) + s(anger), data = train)
+
+predictions_gam <- model_gam %>% predict(test)
+modelPerfomance_gam = data.frame(
+   RMSE = RMSE(predictions_gam, test$retweet_count),
+    R2 = R2(predictions_gam, test$retweet_count)
+)
+print(modelPerfomance_gam)
+```
