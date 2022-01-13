@@ -20,6 +20,7 @@ library(patchwork)
 library(ggrepel)
 library(caret)
 library(mgcv)
+library(dplyr)
 ```
 
 
@@ -371,6 +372,30 @@ ggplot(data = tweets_hist, aes(x = dominance, fill = party)) +
   ggtitle("Dominance per Party") +
   xlab("Dominance") +
   ylab("Count")
+
+ggplot(data = tweets_hist, aes(x = anger, fill = party)) +
+  geom_histogram(binwidth = 0.20, color = "white") +
+  facet_wrap(~party) +
+  geom_vline(aes(xintercept=mean(anger)),
+            color="red",  size=0.8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("darkgreen", "darkblue", "darkgreen", "darkblue")) +
+  ggtitle("Anger per Party") +
+  xlab("Anger") +
+  ylab("Count")
+  
+ggplot(data = tweets_hist, aes(x = fear, fill = party)) +
+  geom_histogram(binwidth = 0.10, color = "white") +
+  facet_wrap(~party) +
+  geom_vline(aes(xintercept=mean(fear)),
+            color="red",  size=0.8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("darkgreen", "darkblue", "darkgreen", "darkblue")) +
+  ggtitle("Fear per Party") +
+  xlab("Fear") +
+  ylab("Count")
 ```
 
 
@@ -503,6 +528,8 @@ tweets_emo_avg_2 <-
   group_by(party) %>%
   summarize(mean_anger = mean(anger, na.rm = T),
             mean_fear = mean(fear, na.rm = T),
+            median_fear = median(fear, na.rm = T),
+            median_anger = median(anger, na.rm = T),
             sd_anger = sd(anger, na.rm = T),
             sd_fear = sd(fear, na.rm = T))
 tweets_emo_avg_2
@@ -512,6 +539,8 @@ tweets_emo_avg_3 <-
   group_by(left_right) %>%
   summarize(mean_anger = mean(anger, na.rm = T),
             mean_fear = mean(fear, na.rm = T),
+            median_fear = median(fear, na.rm = T),
+            median_anger = median(anger, na.rm = T),
             sd_anger = sd(anger, na.rm = T),
             sd_fear = sd(fear, na.rm = T))
 tweets_emo_avg_3 #Also including the dimensions of fear and anger paint the same picture...
@@ -553,6 +582,19 @@ summary(tweets_grde)
 summary(tweets_groe)
 ```
 
+```{r}
+numeric_tweets <-tweets_emo_disc[, sapply(tweets_clean_joined_emo, is.numeric)]
+standard_tweets <- scale(numeric_tweets)
+standard_tweets_1 <- standard_tweets %>%
+  select(favorite_count, retweet_count, left_right, valence, arousal, dominance, anger, fear)
+```
+
+
+```{r}
+cor(standard_tweets,
+    use = "complete.obs", method = "spearman")
+```
+ 
 
 # Temporal Discretisation
 ```{r}
@@ -836,7 +878,6 @@ lineplot_valence_fpoe <-
   ylab("Valence \n") +
   ggtitle("Valence over time in FPOE") +
   scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
@@ -847,7 +888,6 @@ lineplot_dominance_fpoe <-
   ylab("Valence \n") +
   ggtitle("Dominance over time in FPOE") +
   scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
@@ -858,7 +898,6 @@ lineplot_arousal_fpoe <-
   ylab("Valence \n") +
   ggtitle("Arousal over time in FPOE") +
   scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
@@ -973,6 +1012,18 @@ t.test(tweets_disc_afd$arousal, tweets_disc_grde$arousal, var.equal = FALSE, alt
 ```
 
 
+## Germany - Anger
+```{r}
+t.test(tweets_disc_afd$anger, tweets_disc_grde$anger, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
+
+
+## Germany - Fear
+```{r}
+t.test(tweets_disc_afd$fear, tweets_disc_grde$fear, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
+
+
 ## Austria - Valence
 ```{r}
 t.test(tweets_disc_fpoe$valence, tweets_disc_groe$valence, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
@@ -988,6 +1039,18 @@ t.test(tweets_disc_fpoe$dominance, tweets_disc_groe$dominance, var.equal = FALSE
 ## Austria - Arousal
 ```{r}
 t.test(tweets_disc_fpoe$arousal, tweets_disc_groe$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
+
+
+## Austria - Anger
+```{r}
+t.test(tweets_disc_fpoe$anger, tweets_disc_groe$anger, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
+
+
+## Austria - Fear
+```{r}
+t.test(tweets_disc_fpoe$fear, tweets_disc_groe$fear, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
 
@@ -1008,6 +1071,17 @@ t.test(tweets_right$dominance, tweets_left$dominance, var.equal = FALSE, alterna
 t.test(tweets_right$arousal, tweets_left$arousal, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
 ```
 
+
+## Left/Right - Anger
+```{r}
+t.test(tweets_right$anger, tweets_left$anger, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
+
+
+## Left/Right - Fear
+```{r}
+t.test(tweets_right$fear, tweets_left$fear, var.equal = FALSE, alternative = "greater", conf.level = 0.95)
+```
 
 # Regression model
 ```{r}
