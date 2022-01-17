@@ -399,19 +399,6 @@ ggplot(data = tweets_hist, aes(x = fear, fill = party)) +
 ```
 
 
-```{r}
-id_list <- gsub("@", "", id_list) #creating a list with all user subsets, in case we need to loop over it - might delete later
-
-for(i in id_list){
- assign(paste0("tweets_user_", i),
-        tweets_clean_joined_emo %>%
-  filter(screen_name == i))
-}
-
-list_var <- ls(pattern = "tweets_user_*")
-```
-
-
 # Quanteda Analysis
 ```{r}
 corp_tweet <- corpus(tweets_clean_joined_emo, text_field = "text_clean")
@@ -431,7 +418,8 @@ corpus_FPOE <- corp_tweet %>%
 get_dfm <- function(corpus){
 tok_tweet <- tokens(corpus)
 tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua")
+tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("english"))
+stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua", "nsche", "ch", "sterreich", "cke", "kologische", "mpfen", "nnen", "ssen", "rgern", "re", "ckwunsch", "rlich", "d")
 tok_clean <- tokens_select(tok_clean, pattern = stopwords_2, selection = "remove")
 tweet_matrix <- dfm(tok_clean)
 return(tweet_matrix)
@@ -466,6 +454,7 @@ textplot_wordcloud(FPOE_dfm, max_words = 300, min_size = 0.7, min_count = 5, col
 
 ## Wordcloud comparison
 ```{r}
+set.seed(1234)
 comp_tweets_1 <- tweets_clean_joined_emo %>%
   filter(left_right == 1)
 
@@ -486,7 +475,7 @@ corp_comp <- corpus(df_comp, text_field = "text")
 
 comp_dfm <- get_dfm(corp_comp)
 
-textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 140, min_size = 1.2, min_count = 5, labelcolor = "black", rotation = 1,
+textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 140, min_size = 1.2, min_count = 8, labelcolor = "black", rotation = 1,
                    comparison = TRUE, color = c("darkblue", "darkgreen")) #for usage in presentation rotate 90°
 ```
 
@@ -1091,7 +1080,7 @@ sample <- sample.int(n = nrow(tweets_scatter), size = floor(.70*nrow(tweets_scat
 train <- tweets_scatter[sample, ]
 test  <- tweets_scatter[-sample, ]
 
-model <- lm(retweet_count ~ poly(valence, 2, raw = TRUE)  + poly(arousal, 2, raw = TRUE) + poly(dominance, 2, raw = TRUE) + poly(fear, 2, raw = TRUE) + poly(anger, 2, raw = TRUE), data = train)
+model <- lm(retweet_count ~ poly(valence, 2, raw = TRUE) + poly(arousal, 2, raw = TRUE) + poly(dominance, 2, raw = TRUE) + poly(fear, 2, raw = TRUE) + poly(anger, 2, raw = TRUE), data = train)
 
 
 predictions <- model %>% predict(test)
