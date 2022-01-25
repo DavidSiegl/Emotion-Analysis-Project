@@ -418,7 +418,7 @@ corpus_FPOE <- corp_tweet %>%
 get_dfm <- function(corpus){
 tok_tweet <- tokens(corpus)
 tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua", "nsche", "ch", "sterreich", "cke", "kologische", "mpfen", "nnen", "ssen", "rgern", "re", "ckwunsch", "rlich", "d")
+stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua", "nsche", "ch", "sterreich", "cke", "kologische", "mpfen", "nnen", "ssen", "rgern", "re", "ckwunsch", "rlich", "d", "ufeufea", "you", "and")
 tok_clean <- tokens_select(tok_clean, pattern = stopwords_2, selection = "remove")
 tweet_matrix <- dfm(tok_clean)
 return(tweet_matrix)
@@ -477,7 +477,7 @@ corp_comp <- corpus(df_comp, text_field = "text")
 comp_dfm <- get_dfm(corp_comp)
 
 textplot_wordcloud(dfm_trim(comp_dfm, dmin_count = 5, verbose = FALSE), max_words = 140, min_size = 1.2, min_count = 8, labelcolor = "black", rotation = 1,
-                   comparison = TRUE, color = c("darkblue", "darkgreen")) #for usage in presentation rotate 90°
+                   comparison = TRUE, color = c("darkblue", "darkgreen")) # for usage in presentation rotate 90°
 ```
 
 # Descriptive Statistics
