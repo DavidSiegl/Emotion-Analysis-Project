@@ -418,7 +418,6 @@ corpus_FPOE <- corp_tweet %>%
 get_dfm <- function(corpus){
 tok_tweet <- tokens(corpus)
 tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("german"))
-tok_clean <- tokens_remove(tok_tweet, pattern = stopwords("english"))
 stopwords_2 <- c("dass", "„", "–", "1/2", "¿", "*ï*", "ua", "nsche", "ch", "sterreich", "cke", "kologische", "mpfen", "nnen", "ssen", "rgern", "re", "ckwunsch", "rlich", "d")
 tok_clean <- tokens_select(tok_clean, pattern = stopwords_2, selection = "remove")
 tweet_matrix <- dfm(tok_clean)
@@ -432,6 +431,8 @@ set.seed(1234)
 DIEGRUENEN_dfm <- get_dfm(corpus_DIEGRUENEN)
 textplot_wordcloud(DIEGRUENEN_dfm, max_words = 300, min_size = 0.7, min_count = 5, color = "darkgreen")
 ```
+
+
 ```{r}
 set.seed(1234)
 corpus_GRUENE_dfm <- get_dfm(corpus_GRUENE)
@@ -532,7 +533,7 @@ tweets_emo_avg_3 <-
             median_anger = median(anger, na.rm = T),
             sd_anger = sd(anger, na.rm = T),
             sd_fear = sd(fear, na.rm = T))
-tweets_emo_avg_3 #Also including the dimensions of fear and anger paint the same picture...
+tweets_emo_avg_3 # Also including the dimensions of fear and anger paint the same picture...
 ```
 
 
@@ -570,6 +571,7 @@ summary(tweets_grde)
 ```{r}
 summary(tweets_groe)
 ```
+
 
 ```{r}
 numeric_tweets <-tweets_emo_disc[, sapply(tweets_clean_joined_emo, is.numeric)]
@@ -790,34 +792,28 @@ fpoe_comparison
 ```{r}
 lineplot_valence_grde <-
   ggplot(tweets_disc_grde, aes(x=age, y=valence)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Valence over time in DIE GRUENEN") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_dominance_grde <-
   ggplot(tweets_disc_grde, aes(x=age, y=dominance)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Dominance over time in DIE GRUENEN") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_arousal_grde <-
   ggplot(tweets_disc_grde, aes(x=age, y=arousal)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Arousal over time in DIE GRUENEN") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
@@ -826,34 +822,28 @@ lineplot_arousal_grde <-
 ```{r}
 lineplot_valence_groe <-
   ggplot(tweets_disc_groe, aes(x=age, y=valence)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Valence over time in GRUENE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_dominance_groe <-
   ggplot(tweets_disc_groe, aes(x=age, y=dominance)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Dominance over time in GRUENE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_arousal_groe <-
   ggplot(tweets_disc_groe, aes(x=age, y=arousal)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Arousal over time in GRUENE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
@@ -862,31 +852,28 @@ lineplot_arousal_groe <-
 ```{r}
 lineplot_valence_fpoe <-
   ggplot(tweets_disc_fpoe, aes(x=age, y=valence)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Valence over time in FPOE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_dominance_fpoe <-
   ggplot(tweets_disc_fpoe, aes(x=age, y=dominance)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Dominance over time in FPOE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_arousal_fpoe <-
   ggplot(tweets_disc_fpoe, aes(x=age, y=arousal)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Arousal over time in FPOE") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
@@ -899,30 +886,24 @@ lineplot_valence_afd <-
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Valence over time in AFD") +
-  #scale_x_continuous(breaks = seq(1, 20, 2)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set1") +
   theme_minimal()
 
 lineplot_dominance_afd <-
   ggplot(tweets_disc_afd, aes(x=age, y=dominance)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Dominance over time in AFD") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 
 lineplot_arousal_afd <-
   ggplot(tweets_disc_afd, aes(x=age, y=arousal)) +
-  geom_line(aes(color = name), size = 1.5) +
+  geom_line(aes(color = name), size = 1) +
   xlab("\n over time") +
   ylab("Valence \n") +
   ggtitle("Arousal over time in AFD") +
-  scale_x_continuous(breaks = seq(1900, 2000, 10)) +
-  # Let's use the Brewer color palette 
   scale_color_brewer(type = "div", palette = "Set3") +
   theme_minimal()
 ```
@@ -1101,4 +1082,5 @@ modelPerfomance_gam = data.frame(
     R2 = R2(predictions_gam, test$retweet_count)
 )
 print(modelPerfomance_gam)
+# as you can see from the performance table, the model's accuracy is really low and thus the regression model does not seem to be a good fit for explaining the correlation between retweet count and the emotion attributes
 ```
